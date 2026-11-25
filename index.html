@@ -33,7 +33,6 @@
       padding-bottom: 40px;
     }
 
-    /* Header */
     header {
       background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%);
       color: #FFFFFF;
@@ -76,7 +75,6 @@
       opacity: 0.85;
     }
 
-    /* Channel Switcher (All / Arena / NEXA) */
     .channel-tabs {
       display: flex;
       gap: 8px;
@@ -96,12 +94,7 @@
       transition: all 0.2s;
     }
 
-    .ch-btn.active[data-ch="All"] {
-      background: var(--arena-blue);
-      color: #FFFFFF;
-      border-color: var(--arena-blue);
-    }
-
+    .ch-btn.active[data-ch="All"],
     .ch-btn.active[data-ch="Arena"] {
       background: var(--arena-blue);
       color: #FFFFFF;
@@ -114,7 +107,6 @@
       border-color: var(--nexa-dark);
     }
 
-    /* Category Pills */
     .cat-bar {
       display: flex;
       gap: 8px;
@@ -141,7 +133,6 @@
       color: var(--arena-blue);
     }
 
-    /* Car Cards */
     .car-list {
       padding: 0 16px;
       display: flex;
@@ -246,7 +237,6 @@
       background: var(--nexa-dark);
     }
 
-    /* Bottom Sheet Modal */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -310,7 +300,6 @@
       background: #F9FAFB;
     }
 
-    /* On-Road Price Box */
     .quote-box {
       background: #F8FAFC;
       border: 1px solid #CBD5E1;
@@ -414,7 +403,6 @@
 
   <main class="car-list" id="carList"></main>
 
-  <!-- Car Details & Quote Bottom Sheet -->
   <div class="modal-backdrop" id="carModal">
     <div class="modal-sheet">
       <div class="modal-top">
@@ -489,17 +477,17 @@
 
   <script>
     // ========================================================
-    // 1. SHOWROOM CONFIGURATION (EDIT THESE 3 LINKS)
+    // 1. SHOWROOM CONFIGURATION (UPDATE THESE 3 LINKS)
     // ========================================================
     const SHOWROOM_CONFIG = {
-      name: "Popular Prime Maruti Arena & NEXA",
+      name: "Prime Maruti Arena & NEXA",
       tagline: "Authorized Maruti Suzuki Dealership",
-      salesDeskWhatsApp: "919444143914", // Showroom manager WhatsApp (with 91 prefix)
-      googleSheetCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlPWPRqbvTVXbXUBVZ0xfgG3p_4McBKF8cn34ri36aWz953xjU8_s6SzxRtZUYzR5ohibE2oJMhuW1/pub?gid=0&single=true&output=csv",             // Paste published Catalog CSV link here
-      leadWebhookUrl: "https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnTxQqpWdKJt3qdMJ4OdkE_8ciJTR_vCsel-MYYGQycL4T-3x-L1xafD8evKEiKuOavPLyWx0iDZ7fUQm9-WjJZHmhD4zpeRpZP211w_GI6Yxtb_OacG5WlCL-_C3lTsi_Ys7SPmVlOtgJocbUNUdhVv44qEP2K5ehfEiE0D0Kv1FxjrHM2GtrbgCDM55pYhHvMtGgT0N9KGT4qvU39DoB6SHTB8UsQuHJtQwFSlmsqFlyU_HudeVTNqVTYwz4kZ_vySEmSBRoAMXLbTRVCtE0X159blGA&lib=M9weHGg9TIDIGcPKbaxgWUWQIiqB8NiXZ"                 // Paste deployed Apps Script Web App URL here
+      salesDeskWhatsApp: "919444143914", // Showroom WhatsApp number (91 + 10 digits)
+      googleSheetCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlPWPRqbvTVXbXUBVZ0xfgG3p_4McBKF8cn34ri36aWz953xjU8_s6SzxRtZUYzR5ohibE2oJMhuW1/pub?gid=0&single=true&output=csv",             // Published Google Sheet 'Catalog' CSV URL
+      leadWebhookUrl: "script.google.com/macros/s/AKfycbyCIlM6K6HaiJh61wHmCN6ZG3Y98yWkG-riNdwhi9Nk7O6Po2x0ETEKwsQlEDP8CFkLmg/exec"                 // Deployed Apps Script Web App URL (/exec)
     };
 
-    // Fallback catalog if Google Sheet CSV is blank or offline
+    // Offline Fallback Catalog
     let MARUTI_CARS = [
       {
         id: "swift",
@@ -569,7 +557,7 @@
     ];
 
     // ========================================================
-    // 2. APP LOGIC & GOOGLE SHEET SYNC
+    // 2. APP LOGIC, CSV SYNC & RELIABLE BEACON LOGGING
     // ========================================================
     let selectedChannel = "All";
     let selectedCategory = "All";
@@ -586,7 +574,6 @@
       return "₹" + (num / 100000).toFixed(2) + " Lakh";
     }
 
-    // Parse CSV from Google Sheet
     function parseCsvRow(row) {
       const result = [];
       let current = "";
@@ -679,7 +666,7 @@
 
       document.getElementById("catBar").innerHTML = cats.map(cat => `
         <button class="cat-pill ${cat === selectedCategory ? 'active' : ''}" onclick="setCategory('${cat}')">
-          ${cat}
+          \${cat}
         </button>
       `).join("");
     }
@@ -707,20 +694,19 @@
           <div class="car-card">
             <div class="card-header">
               <div>
-                <span class="channel-tag ${isNexa ? 'tag-nexa' : 'tag-arena'}">${car.channel} • ${car.category}</span>
-                <div class="car-title">${car.name}</div>
+                <span class="channel-tag \${isNexa ? 'tag-nexa' : 'tag-arena'}">${car.channel} •${car.category}</span>
+                <div class="car-title">\${car.name}</div>
               </div>
             </div>
-            <div class="car-tagline">${car.tagline}</div>
+            <div class="car-tagline">\${car.tagline}</div>
             <div class="specs-row">
-              <span class="spec-chip">⛽ ${car.fuel}</span>
-              ${car.mileage ? `<span class="spec-chip">⚡ ${car.mileage}</span>` : ""}
-              ${car.engine ? `<span class="spec-chip">⚙️ ${car.engine}</span>` : ""}
+              <span class="spec-chip">⛽ ${car.fuel}</span>${car.mileage ? `<span class="spec-chip">⚡ ${car.mileage}</span>` : ""}
+              \${car.engine ? `<span class="spec-chip">⚙️ ${car.engine}</span>` : ""}
             </div>
             <div class="card-footer">
               <div>
                 <div class="price-label">Starting On-Road Price</div>
-                <div class="price-val">${formatLakh(startingOnRoad)}*</div>
+                <div class="price-val">\${formatLakh(startingOnRoad)}*</div>
               </div>
               <button class="btn-explore ${isNexa ? 'nexa-btn' : ''}" onclick="openCarModal('${car.id}')">
                 Price & Test Drive →
@@ -744,7 +730,7 @@
 
       const select = document.getElementById("variantSelect");
       select.innerHTML = activeCar.variants.map((v, idx) => `
-        <option value="${idx}">${v.name} — Ex-Showroom ${formatINR(v.exShowroom)}</option>
+        <option value="\${idx}">${v.name} — Ex-Showroom${formatINR(v.exShowroom)}</option>
       `).join("");
 
       updateQuote();
@@ -766,12 +752,11 @@
       document.getElementById("qInsurance").textContent = formatINR(v.insurance);
       document.getElementById("qTotal").textContent = formatINR(onRoad);
 
-      // 80% Loan, 8.9% interest, 60 months EMI calculation
       const principal = onRoad * 0.80;
       const r = 8.9 / 12 / 100;
       const n = 60;
       const emi = Math.round((principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1));
-      document.getElementById("emiBanner").textContent = `Est. EMI: ${formatINR(emi)}/mo (80% Finance @ 8.9% for 5 Yrs)`;
+      document.getElementById("emiBanner").textContent = `Est. EMI: \${formatINR(emi)}/mo (80% Finance @ 8.9% for 5 Yrs)`;
     }
 
     function toggleSlotField() {
@@ -790,44 +775,40 @@
       const tdSlot = document.getElementById("tdSlot").value.trim();
       const hasExchange = document.getElementById("exchangeCheck").checked;
 
-      // 1. Log Lead Silently to Google Sheet Webhook (using no-cors POST so browser never blocks it)
+      // 1. Fire-and-Forget Image Beacon (follows Google 302 redirects reliably without CORS blocks)
       if (SHOWROOM_CONFIG.leadWebhookUrl) {
-        fetch(SHOWROOM_CONFIG.leadWebhookUrl, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "text/plain" },
-          body: JSON.stringify({
-            custName: custName,
-            carName: activeCar.name,
-            variantName: v.name,
-            onRoadPrice: onRoad,
-            action: action,
-            tdSlot: tdSlot || "-",
-            hasExchange: hasExchange
-          })
-        }).catch(err => console.warn("Webhook log error:", err));
+        const params = new URLSearchParams({
+          custName: custName,
+          carName: activeCar.name,
+          variantName: v.name,
+          onRoadPrice: onRoad,
+          action: action,
+          tdSlot: tdSlot || "-",
+          hasExchange: hasExchange ? "true" : "false",
+          _t: Date.now()
+        });
+        const beacon = new Image();
+        beacon.src = `${SHOWROOM_CONFIG.leadWebhookUrl}?${params.toString()}`;
       }
 
-      // 2. Open Pre-Filled WhatsApp Message to Showroom Sales Desk
+      // 2. Open Pre-Filled WhatsApp Message
       const lines = [
         `*NEW MARUTI SUZUKI INQUIRY* 🚘`,
         `------------------------`,
-        `*Customer:* ${custName}`,
-        `*Model:* ${activeCar.name} (${activeCar.channel})`,
-        `*Variant:* ${v.name}`,
-        `*Est. On-Road:* ${onRoad}`,
-        `*Request:* ${action}`,
-        tdSlot ? `*Preferred Slot:* ${tdSlot}` : null,
-        `*Old Car Exchange:* ${hasExchange ? "Yes (Interested in True Value Bonus)" : "No"}`,
+        `*Customer:* ${custName}`, `*Model:* ${activeCar.name} (${activeCar.channel})`, `*Variant:* ${v.name}`,
+        `*Est. On-Road:* ${onRoad}`, `*Request:* ${action}`,
+        tdSlot ? `*Preferred Slot:* \${tdSlot}` : null,
+        `*Old Car Exchange:* \${hasExchange ? "Yes (Interested in True Value Bonus)" : "No"}`,
         `------------------------`,
         `Please share the official PDF brochure & available offers!`
       ].filter(Boolean);
 
       const waUrl = `https://wa.me/${SHOWROOM_CONFIG.salesDeskWhatsApp}?text=${encodeURIComponent(lines.join("\n"))}`;
-      window.open(waUrl, "_blank");
+      setTimeout(() => {
+        window.open(waUrl, "_blank");
+      }, 400);
     }
 
-    // Initialize App & Handle URL Parameters (?car=swift or ?channel=nexa)
     (async function init() {
       await loadCatalogFromSheet();
       const params = new URLSearchParams(window.location.search);
