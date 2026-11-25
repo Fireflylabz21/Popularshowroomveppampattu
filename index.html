@@ -3,831 +3,426 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Maruti Suzuki Showroom — Digital Catalog & Test Drive</title>
+  <title>TableTap QR — Order Direct</title>
   <style>
     :root {
-      --arena-blue: #1D4ED8;
-      --nexa-dark: #111827;
-      --accent-red: #DC2626;
+      --bg: #FAF8F5;
+      --card: #FFFFFF;
+      --text: #1F2937;
+      --muted: #6B7280;
+      --accent: #D97706;
+      --accent-dark: #B45309;
+      --veg: #15803D;
+      --nonveg: #B91C1C;
       --whatsapp: #25D366;
-      --bg: #F3F4F6;
-      --surface: #FFFFFF;
-      --text-main: #111827;
-      --text-muted: #6B7280;
       --border: #E5E7EB;
     }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 92px; }
+    .container { max-width: 520px; margin: 0 auto; }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
+    /* Header */
+    header { background: var(--card); padding: 14px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 20; }
+    .brand-row { display: flex; justify-content: space-between; align-items: center; }
+    .brand-title { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+    .table-badge { background: #FEF3C7; color: var(--accent-dark); font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; border: 1px solid #FDE68A; }
+    .sync-status { font-size: 11px; color: var(--muted); margin-top: 3px; display: flex; align-items: center; gap: 5px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #10B981; display: inline-block; }
 
-    body {
-      background-color: var(--bg);
-      color: var(--text-main);
-      max-width: 540px;
-      margin: 0 auto;
-      padding-bottom: 40px;
-    }
+    /* Search & Veg Filter */
+    .controls { padding: 10px 16px; background: var(--card); border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
+    .search-input { flex: 1; padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; background: #F9FAFB; outline: none; }
+    .search-input:focus { border-color: var(--accent); background: #FFF; }
+    .veg-pill { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; background: #FFF; user-select: none; white-space: nowrap; }
+    .veg-pill.active { border-color: var(--veg); background: #F0FDF4; color: var(--veg); }
 
-    header {
-      background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%);
-      color: #FFFFFF;
-      padding: 20px 18px 18px;
-      border-bottom-left-radius: 20px;
-      border-bottom-right-radius: 20px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
-    }
-
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .dealer-badge {
-      background: rgba(255, 255, 255, 0.16);
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
-      padding: 4px 10px;
-      border-radius: 99px;
-    }
-
-    .sync-status {
-      font-size: 11px;
-      color: #93C5FD;
-    }
-
-    header h1 {
-      font-size: 21px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    header p {
-      font-size: 13px;
-      opacity: 0.85;
-    }
-
-    .channel-tabs {
-      display: flex;
-      gap: 8px;
-      padding: 14px 16px 6px;
-    }
-
-    .ch-btn {
-      flex: 1;
-      padding: 9px 10px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      color: var(--text-main);
-      transition: all 0.2s;
-    }
-
-    .ch-btn.active[data-ch="All"],
-    .ch-btn.active[data-ch="Arena"] {
-      background: var(--arena-blue);
-      color: #FFFFFF;
-      border-color: var(--arena-blue);
-    }
-
-    .ch-btn.active[data-ch="NEXA"] {
-      background: var(--nexa-dark);
-      color: #FFFFFF;
-      border-color: var(--nexa-dark);
-    }
-
-    .cat-bar {
-      display: flex;
-      gap: 8px;
-      padding: 8px 16px 12px;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
+    /* Sticky Category Tabs */
+    .cat-bar { display: flex; gap: 8px; overflow-x: auto; padding: 10px 16px; background: var(--bg); position: sticky; top: 61px; z-index: 15; scrollbar-width: none; }
     .cat-bar::-webkit-scrollbar { display: none; }
+    .cat-tab { padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; background: #FFF; border: 1px solid var(--border); color: var(--muted); white-space: nowrap; cursor: pointer; }
+    .cat-tab.active { background: var(--text); color: #FFF; border-color: var(--text); }
 
-    .cat-pill {
-      padding: 6px 14px;
-      border-radius: 99px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      font-size: 12px;
-      font-weight: 600;
-      white-space: nowrap;
-      cursor: pointer;
-    }
+    /* Menu Cards */
+    .menu-list { padding: 4px 16px 20px; }
+    .cat-heading { font-size: 15px; font-weight: 800; margin: 14px 0 8px; color: var(--text); text-transform: uppercase; letter-spacing: 0.04em; }
+    .item-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+    .item-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .fssai-box { width: 14px; height: 14px; border: 1.5px solid var(--veg); border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; }
+    .fssai-box.nonveg { border-color: var(--nonveg); }
+    .fssai-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--veg); }
+    .fssai-box.nonveg .fssai-dot { background: var(--nonveg); border-radius: 1px; }
+    .bestseller { font-size: 10px; font-weight: 800; background: #FEF3C7; color: #B45309; padding: 2px 6px; border-radius: 4px; }
+    .item-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+    .item-desc { font-size: 12px; color: var(--muted); line-height: 1.35; margin-bottom: 6px; }
+    .item-price { font-size: 14px; font-weight: 800; }
 
-    .cat-pill.active {
-      background: #DBEAFE;
-      border-color: var(--arena-blue);
-      color: var(--arena-blue);
-    }
+    /* Stepper */
+    .stepper { display: flex; align-items: center; border: 1.5px solid var(--accent); border-radius: 10px; overflow: hidden; background: #FFFBEB; min-width: 86px; justify-content: space-between; }
+    .add-btn { width: 100%; padding: 7px 14px; border: none; background: transparent; color: var(--accent-dark); font-weight: 800; font-size: 13px; cursor: pointer; }
+    .step-btn { width: 28px; height: 32px; border: none; background: transparent; color: var(--accent-dark); font-weight: 800; font-size: 16px; cursor: pointer; }
+    .step-qty { font-size: 13px; font-weight: 800; color: var(--text); }
 
-    .car-list {
-      padding: 0 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+    /* Sticky Bottom Cart Bar */
+    .cart-bar { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 488px; background: var(--text); color: #FFF; padding: 14px 18px; border-radius: 14px; display: none; justify-content: space-between; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); cursor: pointer; z-index: 30; }
+    .cart-bar.visible { display: flex; }
 
-    .car-card {
-      background: var(--surface);
-      border-radius: 16px;
-      padding: 16px;
-      border: 1px solid var(--border);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 8px;
-    }
-
-    .channel-tag {
-      font-size: 10px;
-      font-weight: 800;
-      text-transform: uppercase;
-      padding: 3px 8px;
-      border-radius: 5px;
-      letter-spacing: 0.6px;
-    }
-
-    .tag-arena {
-      background: #DBEAFE;
-      color: #1E40AF;
-    }
-
-    .tag-nexa {
-      background: #111827;
-      color: #F9FAFB;
-    }
-
-    .car-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin-top: 6px;
-    }
-
-    .car-tagline {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 10px;
-    }
-
-    .specs-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 14px;
-    }
-
-    .spec-chip {
-      background: #F9FAFB;
-      border: 1px solid var(--border);
-      font-size: 11px;
-      font-weight: 600;
-      padding: 4px 9px;
-      border-radius: 6px;
-      color: #374151;
-    }
-
-    .card-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-top: 12px;
-      border-top: 1px solid var(--border);
-    }
-
-    .price-label {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .price-val {
-      font-size: 17px;
-      font-weight: 800;
-      color: var(--text-main);
-    }
-
-    .btn-explore {
-      background: var(--arena-blue);
-      color: #FFFFFF;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .btn-explore.nexa-btn {
-      background: var(--nexa-dark);
-    }
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 50;
-      display: none;
-      align-items: flex-end;
-      justify-content: center;
-    }
-
+    /* Checkout Modal */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: none; align-items: flex-end; justify-content: center; z-index: 50; }
     .modal-backdrop.open { display: flex; }
-
-    .modal-sheet {
-      background: var(--surface);
-      width: 100%;
-      max-width: 540px;
-      border-top-left-radius: 22px;
-      border-top-right-radius: 22px;
-      padding: 20px 18px 28px;
-      max-height: 92vh;
-      overflow-y: auto;
-    }
-
-    .modal-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 14px;
-    }
-
-    .close-btn {
-      background: #F3F4F6;
-      border: none;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .form-group {
-      margin-bottom: 12px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 12px;
-      font-weight: 700;
-      color: #374151;
-      margin-bottom: 5px;
-    }
-
-    .form-group select, .form-group input {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      font-size: 14px;
-      background: #F9FAFB;
-    }
-
-    .quote-box {
-      background: #F8FAFC;
-      border: 1px solid #CBD5E1;
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin: 14px 0;
-    }
-
-    .quote-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      margin-bottom: 6px;
-      color: #475569;
-    }
-
-    .quote-total {
-      display: flex;
-      justify-content: space-between;
-      font-size: 16px;
-      font-weight: 800;
-      color: #0F172A;
-      padding-top: 8px;
-      border-top: 1px dashed #CBD5E1;
-      margin-top: 6px;
-    }
-
-    .emi-banner {
-      background: #EFF6FF;
-      color: #1E40AF;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 8px 12px;
-      border-radius: 8px;
-      margin-top: 10px;
-      text-align: center;
-    }
-
-    .action-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 16px;
-    }
-
-    .btn-brochure {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1.5px solid var(--arena-blue);
-      background: #FFFFFF;
-      color: var(--arena-blue);
-      font-size: 14px;
-      font-weight: 700;
-      text-align: center;
-      text-decoration: none;
-      display: block;
-    }
-
-    .btn-whatsapp {
-      width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      border: none;
-      background: var(--whatsapp);
-      color: #052E16;
-      font-size: 15px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .checkbox-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      margin-top: 8px;
-    }
-    .checkbox-row input { width: auto; }
+    .sheet { background: #FFF; width: 100%; max-width: 520px; border-radius: 20px 20px 0 0; padding: 20px; max-height: 90vh; overflow-y: auto; }
+    .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .close-btn { background: #F3F4F6; border: none; width: 30px; height: 30px; border-radius: 50%; font-weight: 700; cursor: pointer; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+    .field input, .field select, .field textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; }
+    .field input[readonly] { background: #F3F4F6; font-weight: 700; color: var(--text); }
+    .cart-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--border); font-size: 14px; }
+    .total-row { display: flex; justify-content: space-between; font-size: 17px; font-weight: 800; margin: 14px 0; }
+    .wa-btn { width: 100%; padding: 14px; border: none; border-radius: 12px; background: var(--whatsapp); color: #FFF; font-size: 15px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .wa-btn:disabled { opacity: 0.6; cursor: wait; }
   </style>
 </head>
 <body>
-
+<div class="container">
   <header>
-    <div class="top-bar">
-      <span class="dealer-badge" id="dealerTag">Authorized Maruti Suzuki Dealer</span>
-      <span class="sync-status" id="syncStatus">● Catalog Ready</span>
+    <div class="brand-row">
+      <div class="brand-title">Roast &amp; Crumb Café</div>
+      <div class="table-badge" id="locationBadge">Dine-In</div>
     </div>
-    <h1 id="showroomName">Prime Maruti Arena & NEXA</h1>
-    <p id="showroomSub">Instant On-Road Price • EMI Calculator • Test Drive</p>
+    <div class="sync-status"><span class="dot"></span><span id="syncText">Live Menu Synced</span></div>
   </header>
 
-  <div class="channel-tabs">
-    <button class="ch-btn active" data-ch="All" onclick="setChannel('All')">All Models</button>
-    <button class="ch-btn" data-ch="Arena" onclick="setChannel('Arena')">Arena</button>
-    <button class="ch-btn" data-ch="NEXA" onclick="setChannel('NEXA')">NEXA</button>
+  <div class="controls">
+    <input type="search" id="searchInput" class="search-input" placeholder="Search coffee, croissants, bowls..." />
+    <div class="veg-pill" id="vegToggle">
+      <span class="fssai-box"><span class="fssai-dot"></span></span> Veg Only
+    </div>
   </div>
 
   <div class="cat-bar" id="catBar"></div>
+  <div class="menu-list" id="menuList"></div>
+</div>
 
-  <main class="car-list" id="carList"></main>
-
-  <div class="modal-backdrop" id="carModal">
-    <div class="modal-sheet">
-      <div class="modal-top">
-        <div>
-          <span class="channel-tag" id="modalChannelTag">ARENA</span>
-          <h2 id="modalCarName" style="font-size:19px; margin-top:4px;">All-New Swift</h2>
-        </div>
-        <button class="close-btn" onclick="closeModal()">✕</button>
-      </div>
-
-      <div class="form-group">
-        <label>Select Variant</label>
-        <select id="variantSelect" onchange="updateQuote()"></select>
-      </div>
-
-      <div class="quote-box">
-        <div class="quote-row">
-          <span>Ex-Showroom Price</span>
-          <strong id="qExShowroom">₹0</strong>
-        </div>
-        <div class="quote-row">
-          <span>RTO & Road Tax (Est.)</span>
-          <strong id="qRto">₹0</strong>
-        </div>
-        <div class="quote-row">
-          <span>Comprehensive Insurance (1+3 Yr)</span>
-          <strong id="qInsurance">₹0</strong>
-        </div>
-        <div class="quote-total">
-          <span>Est. On-Road Price</span>
-          <span id="qTotal">₹0</span>
-        </div>
-        <div class="emi-banner" id="emiBanner">
-          Est. EMI: ₹11,450/month (80% Loan @ 8.9% for 5 Yrs)
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Your Name</label>
-        <input type="text" id="custName" placeholder="Enter your full name" />
-      </div>
-
-      <div class="form-group">
-        <label>What would you like to do?</label>
-        <select id="leadAction" onchange="toggleSlotField()">
-          <option value="Get On-Road Quote & Brochure on WhatsApp">Get On-Road Quote & Brochure on WhatsApp</option>
-          <option value="Book a Test Drive (At Showroom)">Book a Test Drive (At Showroom)</option>
-          <option value="Book a Home Test Drive">Book a Home Test Drive</option>
-        </select>
-      </div>
-
-      <div class="form-group" id="slotGroup" style="display:none;">
-        <label>Preferred Test Drive Slot</label>
-        <input type="text" id="tdSlot" placeholder="e.g., Today 4:30 PM or Sunday Morning" />
-      </div>
-
-      <label class="checkbox-row">
-        <input type="checkbox" id="exchangeCheck" />
-        I have an old car for True Value Exchange Bonus
-      </label>
-
-      <div class="action-buttons">
-        <a id="brochureBtn" href="#" target="_blank" class="btn-brochure">
-          📄 View Official Brochure PDF
-        </a>
-        <button class="btn-whatsapp" onclick="submitLeadToWhatsApp()">
-          📲 Get Quote & Book on WhatsApp
-        </button>
-      </div>
-    </div>
+<!-- Sticky Cart Summary -->
+<div class="cart-bar" id="cartBar">
+  <div>
+    <div style="font-size:12px;opacity:.85" id="cartCount">0 Items</div>
+    <div style="font-size:16px;font-weight:800" id="cartSubtotal">₹0</div>
   </div>
+  <div style="font-weight:800;font-size:14px">Review &amp; Order →</div>
+</div>
 
-  <script>
-    // ========================================================
-    // 1. SHOWROOM CONFIGURATION (UPDATE THESE 3 LINKS)
-    // ========================================================
-    const SHOWROOM_CONFIG = {
-      name: "Prime Maruti Arena & NEXA",
-      tagline: "Authorized Maruti Suzuki Dealership",
-      salesDeskWhatsApp: "919444143914", // Showroom WhatsApp number (91 + 10 digits)
-      googleSheetCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlPWPRqbvTVXbXUBVZ0xfgG3p_4McBKF8cn34ri36aWz953xjU8_s6SzxRtZUYzR5ohibE2oJMhuW1/pub?gid=0&single=true&output=csv",             // Published Google Sheet 'Catalog' CSV URL
-      leadWebhookUrl: "script.google.com/macros/s/AKfycbyCIlM6K6HaiJh61wHmCN6ZG3Y98yWkG-riNdwhi9Nk7O6Po2x0ETEKwsQlEDP8CFkLmg/exec"                 // Deployed Apps Script Web App URL (/exec)
-    };
+<!-- Checkout Drawer -->
+<div class="modal-backdrop" id="checkoutModal">
+  <div class="sheet">
+    <div class="sheet-header">
+      <h3>Your Order Summary</h3>
+      <button class="close-btn" id="closeModal">✕</button>
+    </div>
 
-    // Offline Fallback Catalog
-    let MARUTI_CARS = [
-      {
-        id: "swift",
-        channel: "Arena",
-        category: "Hatchback",
-        name: "All-New Swift",
-        tagline: "Sporty Hatchback with Epic Mileage",
-        fuel: "Petrol / S-CNG",
-        mileage: "25.75 kmpl",
-        engine: "1.2L Z12E",
-        brochure: "https://www.marutisuzuki.com/swift",
-        variants: [
-          { name: "LXi Petrol (Base)", exShowroom: 649000, rto: 58400, insurance: 32600 },
-          { name: "VXi (O) Petrol", exShowroom: 756500, rto: 68000, insurance: 35500 },
-          { name: "VXi S-CNG", exShowroom: 819500, rto: 73700, insurance: 37200 },
-          { name: "ZXi+ AMT Petrol (Top)", exShowroom: 959500, rto: 86300, insurance: 41200 }
-        ]
-      },
-      {
-        id: "brezza",
-        channel: "Arena",
-        category: "SUV",
-        name: "Maruti Brezza",
-        tagline: "City-Bred Compact SUV",
-        fuel: "Petrol / S-CNG",
-        mileage: "25.51 km/kg",
-        engine: "1.5L K15C",
-        brochure: "https://www.marutisuzuki.com/brezza",
-        variants: [
-          { name: "LXi Petrol", exShowroom: 834000, rto: 75000, insurance: 38500 },
-          { name: "VXi S-CNG", exShowroom: 1064500, rto: 106000, insurance: 44500 },
-          { name: "ZXi+ AT Dual Tone", exShowroom: 1414000, rto: 141400, insurance: 52600 }
-        ]
-      },
-      {
-        id: "fronx",
-        channel: "NEXA",
-        category: "SUV",
-        name: "NEXA Fronx",
-        tagline: "The Shape of New — Coupe SUV",
-        fuel: "Turbo Petrol / CNG",
-        mileage: "22.89 kmpl",
-        engine: "1.0L Boosterjet",
-        brochure: "https://www.nexaexperience.com/fronx",
-        variants: [
-          { name: "Sigma 1.2L Petrol", exShowroom: 751500, rto: 67600, insurance: 35400 },
-          { name: "Delta+ S-CNG", exShowroom: 932500, rto: 83900, insurance: 40500 },
-          { name: "Alpha 1.0L Turbo AT", exShowroom: 1287500, rto: 128700, insurance: 49200 }
-        ]
-      },
-      {
-        id: "grand_vitara",
-        channel: "NEXA",
-        category: "SUV",
-        name: "NEXA Grand Vitara",
-        tagline: "Intelligent Electric Hybrid SUV",
-        fuel: "Strong Hybrid / CNG",
-        mileage: "27.97 kmpl",
-        engine: "1.5L Hybrid",
-        brochure: "https://www.nexaexperience.com/grand-vitara",
-        variants: [
-          { name: "Sigma Smart Hybrid", exShowroom: 1099000, rto: 109900, insurance: 45200 },
-          { name: "Delta S-CNG", exShowroom: 1315000, rto: 131500, insurance: 50100 },
-          { name: "Alpha+ Strong Hybrid e-CVT", exShowroom: 1993000, rto: 199300, insurance: 65400 }
-        ]
-      }
-    ];
+    <div id="checkoutItems"></div>
+    <div class="total-row"><span>Total Payable (UPI / Cash at Counter)</span><span id="modalTotal">₹0</span></div>
 
-    // ========================================================
-    // 2. APP LOGIC, CSV SYNC & RELIABLE BEACON LOGGING
-    // ========================================================
-    let selectedChannel = "All";
-    let selectedCategory = "All";
-    let activeCar = null;
+    <div class="field">
+      <label>Order Type</label>
+      <select id="orderTypeSelect">
+        <option value="Dine-In">Dine-In</option>
+        <option value="Takeaway">Takeaway</option>
+      </select>
+    </div>
 
-    document.getElementById("showroomName").textContent = SHOWROOM_CONFIG.name;
-    document.getElementById("dealerTag").textContent = SHOWROOM_CONFIG.tagline;
+    <div class="field" id="tableFieldWrap">
+      <label>Table Number</label>
+      <input type="text" id="tableInput" placeholder="e.g. Table 04" />
+    </div>
 
-    function formatINR(num) {
-      return "₹" + Number(num).toLocaleString("en-IN");
-    }
+    <div class="field">
+      <label>Your Name (Optional)</label>
+      <input type="text" id="customerName" placeholder="e.g. Aarav" />
+    </div>
 
-    function formatLakh(num) {
-      return "₹" + (num / 100000).toFixed(2) + " Lakh";
-    }
+    <div class="field">
+      <label>Kitchen Instructions</label>
+      <textarea id="orderNotes" rows="2" placeholder="e.g. Less sugar, oat milk, extra hot..."></textarea>
+    </div>
 
-    function parseCsvRow(row) {
-      const result = [];
-      let current = "";
-      let inQuotes = false;
-      for (let i = 0; i < row.length; i++) {
-        const char = row[i];
-        if (char === '"') {
-          inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-          result.push(current.trim());
-          current = "";
-        } else {
-          current += char;
-        }
-      }
-      result.push(current.trim());
-      return result;
-    }
+    <button class="wa-btn" id="submitOrderBtn">Send Order on WhatsApp</button>
+  </div>
+</div>
 
-    async function loadCatalogFromSheet() {
-      if (!SHOWROOM_CONFIG.googleSheetCsvUrl) return;
-      const statusEl = document.getElementById("syncStatus");
-      statusEl.textContent = "↻ Syncing Prices...";
+<script>
+  /**
+   * CONFIGURATION — Replace with your live Google Sheet CSV URL, Apps Script Web App URL, and Cafe WhatsApp Number
+   */
+  const CONFIG = {
+    SHEET_CSV_URL: 'YOUR_PUBLISHED_GOOGLE_SHEET_MENU_CSV_URL',
+    APPS_SCRIPT_URL: 'YOUR_DEPLOYED_APPS_SCRIPT_WEB_APP_URL',
+    CAFE_WHATSAPP: '919876543210'
+  };
 
-      try {
-        const res = await fetch(SHOWROOM_CONFIG.googleSheetCsvUrl);
-        const text = await res.text();
-        const lines = text.split(/\r?\n/).filter(l => l.trim());
-        if (lines.length < 2) return;
+  // Embedded Offline Fallback Menu (FR-1.1)
+  const FALLBACK_MENU = [
+    { id: 1, category: 'Hot Coffee', name: 'Signature Flat White', desc: 'Double ristretto poured over velvety micro-foamed milk.', price: 180, veg: true, bestseller: true, available: true },
+    { id: 2, category: 'Hot Coffee', name: 'Spanish Cortado', desc: 'Equal parts bold espresso and textured sweetened milk.', price: 170, veg: true, bestseller: false, available: true },
+    { id: 3, category: 'Cold Brews', name: '18-Hr Classic Cold Brew', desc: 'Steeped slow with Chikmagalur single-estate Arabica.', price: 210, veg: true, bestseller: true, available: true },
+    { id: 4, category: 'Cold Brews', name: 'Yuzu Espresso Tonic', desc: 'Sparkling tonic, Japanese yuzu citrus, double espresso.', price: 240, veg: true, bestseller: false, available: true },
+    { id: 5, category: 'All-Day Bites', name: 'Almond Butter Croissant', desc: 'Flaky French butter pastry baked fresh every morning.', price: 195, veg: true, bestseller: true, available: true },
+    { id: 6, category: 'All-Day Bites', name: 'Smoked Chicken Ciabatta', desc: 'Herb-roasted chicken, pesto aioli, aged cheddar on sourdough.', price: 290, veg: false, bestseller: true, available: true }
+  ];
 
-        const headers = parseCsvRow(lines[0]).map(h => h.toLowerCase());
-        const grouped = {};
+  let menuItems = [];
+  let cart = {};
+  let vegOnly = false;
+  let activeCategory = 'All';
+  let searchQuery = '';
 
-        for (let i = 1; i < lines.length; i++) {
-          const cols = parseCsvRow(lines[i]);
-          const rowObj = {};
-          headers.forEach((h, idx) => rowObj[h] = cols[idx] || "");
+  // FR-1.2: URL Parameter Auto-Detection (?table=04 & ?type=takeaway)
+  const params = new URLSearchParams(window.location.search);
+  const urlTable = params.get('table');
+  const urlType = (params.get('type') || '').toLowerCase();
 
-          if (rowObj.available && rowObj.available.toUpperCase() === "FALSE") continue;
-          const id = rowObj.car_id;
-          if (!id) continue;
+  const orderTypeSelect = document.getElementById('orderTypeSelect');
+  const tableInput = document.getElementById('tableInput');
+  const tableFieldWrap = document.getElementById('tableFieldWrap');
+  const locationBadge = document.getElementById('locationBadge');
 
-          if (!grouped[id]) {
-            grouped[id] = {
-              id: id,
-              channel: rowObj.channel || "Arena",
-              category: rowObj.category || "Car",
-              name: rowObj.model_name || id,
-              tagline: rowObj.tagline || "",
-              fuel: rowObj.fuel || "Petrol",
-              mileage: rowObj.mileage || "",
-              engine: rowObj.engine || "",
-              brochure: rowObj.brochure_url || "#",
-              variants: []
-            };
-          }
-
-          grouped[id].variants.push({
-            name: rowObj.variant || "Standard",
-            exShowroom: Number(rowObj.ex_showroom) || 0,
-            rto: Number(rowObj.rto) || 0,
-            insurance: Number(rowObj.insurance) || 0
-          });
-        }
-
-        const parsedCars = Object.values(grouped);
-        if (parsedCars.length > 0) {
-          MARUTI_CARS = parsedCars;
-          statusEl.textContent = "● Live Prices Synced";
-        }
-      } catch (err) {
-        console.warn("Using fallback catalog:", err);
-        statusEl.textContent = "● Offline Catalog";
-      }
-    }
-
-    function setChannel(ch) {
-      selectedChannel = ch;
-      document.querySelectorAll(".ch-btn").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.ch === ch);
+  function initLocationFromURL() {
+    if (urlType === 'takeaway') {
+      orderTypeSelect.value = 'Takeaway';
+      orderTypeSelect.disabled = true;
+      tableFieldWrap.style.display = 'none';
+      locationBadge.textContent = 'Takeaway Counter';
+    } else if (urlTable) {
+      orderTypeSelect.value = 'Dine-In';
+      orderTypeSelect.disabled = true;
+      tableInput.value = `Table ${urlTable.padStart(2, '0')}`;
+      tableInput.readOnly = true;
+      locationBadge.textContent = `Table ${urlTable.padStart(2, '0')}`;
+    } else {
+      orderTypeSelect.addEventListener('change', () => {
+        tableFieldWrap.style.display = orderTypeSelect.value === 'Takeaway' ? 'none' : 'block';
+        locationBadge.textContent = orderTypeSelect.value;
       });
-      renderCategories();
-      renderCars();
     }
+  }
 
-    function renderCategories() {
-      const filteredByCh = MARUTI_CARS.filter(c => selectedChannel === "All" || c.channel === selectedChannel);
-      const cats = ["All", ...new Set(filteredByCh.map(c => c.category))];
-      if (!cats.includes(selectedCategory)) selectedCategory = "All";
-
-      document.getElementById("catBar").innerHTML = cats.map(cat => `
-        <button class="cat-pill ${cat === selectedCategory ? 'active' : ''}" onclick="setCategory('${cat}')">
-          \${cat}
-        </button>
-      `).join("");
-    }
-
-    function setCategory(cat) {
-      selectedCategory = cat;
-      renderCategories();
-      renderCars();
-    }
-
-    function renderCars() {
-      const list = document.getElementById("carList");
-      const cars = MARUTI_CARS.filter(c => {
-        if (selectedChannel !== "All" && c.channel !== selectedChannel) return false;
-        if (selectedCategory !== "All" && c.category !== selectedCategory) return false;
-        return true;
+  // CSV Parser for Published Google Sheet
+  function parseCSV(text) {
+    const lines = text.trim().split(/\r?\n/);
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    return lines.slice(1).map(line => {
+      const cols = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
+      const obj = {};
+      headers.forEach((h, idx) => {
+        let val = (cols[idx] || '').replace(/^"|"$/g, '').trim();
+        if (h === 'id' || h === 'price') val = Number(val);
+        if (h === 'veg' || h === 'bestseller' || h === 'available') val = val.toUpperCase() === 'TRUE';
+        obj[h] = val;
       });
+      return obj;
+    });
+  }
 
-      list.innerHTML = cars.map(car => {
-        const baseVar = car.variants[0];
-        const startingOnRoad = baseVar.exShowroom + baseVar.rto + baseVar.insurance;
-        const isNexa = car.channel.toLowerCase() === "nexa";
+  async function loadMenu() {
+    try {
+      if (!CONFIG.SHEET_CSV_URL.startsWith('http')) throw new Error('Using fallback');
+      const res = await fetch(CONFIG.SHEET_CSV_URL);
+      const csv = await res.text();
+      const parsed = parseCSV(csv).filter(item => item.available === true);
+      if (!parsed.length) throw new Error('Empty sheet');
+      menuItems = parsed;
+      document.getElementById('syncText').textContent = 'Live Google Sheet Synced';
+    } catch (e) {
+      menuItems = FALLBACK_MENU.filter(item => item.available === true);
+      document.getElementById('syncText').textContent = 'Offline Instant Menu Ready';
+    }
+    renderCategories();
+    renderMenu();
+  }
 
+  function renderCategories() {
+    const cats = ['All', ...new Set(menuItems.map(i => i.category))];
+    const catBar = document.getElementById('catBar');
+    catBar.innerHTML = cats.map(c =>
+      `<button class="cat-tab ${c === activeCategory ? 'active' : ''}" onclick="setCategory('${c}')">${c}</button>`
+    ).join('');
+  }
+
+  window.setCategory = function(cat) {
+    activeCategory = cat;
+    renderCategories();
+    renderMenu();
+  };
+
+  function renderMenu() {
+    const filtered = menuItems.filter(item => {
+      if (vegOnly && !item.veg) return false;
+      if (activeCategory !== 'All' && item.category !== activeCategory) return false;
+      if (searchQuery && !(`${item.name} ${item.desc}`).toLowerCase().includes(searchQuery)) return false;
+      return true;
+    });
+
+    const grouped = filtered.reduce((acc, item) => {
+      (acc[item.category] = acc[item.category] || []).push(item);
+      return acc;
+    }, {});
+
+    const menuList = document.getElementById('menuList');
+    if (!filtered.length) {
+      menuList.innerHTML = `<p style="text-align:center;color:#6B7280;padding:40px 0;">No matching dishes found.</p>`;
+      return;
+    }
+
+    menuList.innerHTML = Object.entries(grouped).map(([category, items]) => `
+      <div class="cat-heading">${category}</div>
+      ${items.map(item => {
+        const qty = cart[item.id] || 0;
         return `
-          <div class="car-card">
-            <div class="card-header">
-              <div>
-                <span class="channel-tag \${isNexa ? 'tag-nexa' : 'tag-arena'}">${car.channel} •${car.category}</span>
-                <div class="car-title">\${car.name}</div>
+          <div class="item-card">
+            <div>
+              <div class="item-meta">
+                <span class="fssai-box ${item.veg ? '' : 'nonveg'}"><span class="fssai-dot"></span></span>
+                ${item.bestseller ? '<span class="bestseller">★ BESTSELLER</span>' : ''}
               </div>
+              <div class="item-name">${item.name}</div>
+              <div class="item-desc">${item.desc}</div>
+              <div class="item-price">₹${item.price}</div>
             </div>
-            <div class="car-tagline">\${car.tagline}</div>
-            <div class="specs-row">
-              <span class="spec-chip">⛽ ${car.fuel}</span>${car.mileage ? `<span class="spec-chip">⚡ ${car.mileage}</span>` : ""}
-              \${car.engine ? `<span class="spec-chip">⚙️ ${car.engine}</span>` : ""}
+            <div class="stepper">
+              ${qty === 0
+                ? `<button class="add-btn" onclick="updateQty(${item.id}, 1)">+ ADD</button>`
+                : `<button class="step-btn" onclick="updateQty(${item.id}, -1)">−</button>
+                   <span class="step-qty">${qty}</span>
+                   <button class="step-btn" onclick="updateQty(${item.id}, 1)">+</button>`}
             </div>
-            <div class="card-footer">
-              <div>
-                <div class="price-label">Starting On-Road Price</div>
-                <div class="price-val">\${formatLakh(startingOnRoad)}*</div>
-              </div>
-              <button class="btn-explore ${isNexa ? 'nexa-btn' : ''}" onclick="openCarModal('${car.id}')">
-                Price & Test Drive →
-              </button>
-            </div>
-          </div>
-        `;
-      }).join("");
+          </div>`;
+      }).join('')}
+    `).join('');
+  }
+
+  window.updateQty = function(id, delta) {
+    const next = (cart[id] || 0) + delta;
+    if (next <= 0) delete cart[id];
+    else cart[id] = next;
+    renderMenu();
+    updateCartBar();
+  };
+
+  function getCartDetails() {
+    let count = 0;
+    let total = 0;
+    const lines = [];
+    Object.entries(cart).forEach(([id, qty]) => {
+      const item = menuItems.find(m => m.id === Number(id));
+      if (item) {
+        count += qty;
+        total += item.price * qty;
+        lines.push({ ...item, qty, lineTotal: item.price * qty });
+      }
+    });
+    return { count, total, lines };
+  }
+
+  function updateCartBar() {
+    const { count, total } = getCartDetails();
+    const bar = document.getElementById('cartBar');
+    if (count > 0) {
+      bar.classList.add('visible');
+      document.getElementById('cartCount').textContent = `${count} Item${count > 1 ? 's' : ''}`;
+      document.getElementById('cartSubtotal').textContent = `₹${total}`;
+    } else {
+      bar.classList.remove('visible');
     }
+  }
 
-    function openCarModal(carId) {
-      activeCar = MARUTI_CARS.find(c => c.id === carId);
-      if (!activeCar) return;
+  // Event Listeners
+  document.getElementById('searchInput').addEventListener('input', e => {
+    searchQuery = e.target.value.trim().toLowerCase();
+    renderMenu();
+  });
 
-      const tag = document.getElementById("modalChannelTag");
-      tag.textContent = activeCar.channel.toUpperCase();
-      tag.className = "channel-tag " + (activeCar.channel.toLowerCase() === "nexa" ? "tag-nexa" : "tag-arena");
+  document.getElementById('vegToggle').addEventListener('click', function() {
+    vegOnly = !vegOnly;
+    this.classList.toggle('active', vegOnly);
+    renderMenu();
+  });
 
-      document.getElementById("modalCarName").textContent = activeCar.name;
-      document.getElementById("brochureBtn").href = activeCar.brochure;
+  document.getElementById('cartBar').addEventListener('click', () => {
+    const { total, lines } = getCartDetails();
+    document.getElementById('checkoutItems').innerHTML = lines.map(l =>
+      `<div class="cart-row"><span>${l.qty} × ${l.name}</span><strong>₹${l.lineTotal}</strong></div>`
+    ).join('');
+    document.getElementById('modalTotal').textContent = `₹${total}`;
+    document.getElementById('checkoutModal').classList.add('open');
+  });
 
-      const select = document.getElementById("variantSelect");
-      select.innerHTML = activeCar.variants.map((v, idx) => `
-        <option value="\${idx}">${v.name} — Ex-Showroom${formatINR(v.exShowroom)}</option>
-      `).join("");
+  document.getElementById('closeModal').addEventListener('click', () => {
+    document.getElementById('checkoutModal').classList.remove('open');
+  });
 
-      updateQuote();
-      document.getElementById("carModal").classList.add("open");
-    }
+  // FR-1.5: Dual-Channel Order Dispatch (Google Sheet Webhook + WhatsApp Ticket)
+  document.getElementById('submitOrderBtn').addEventListener('click', async function() {
+    const btn = this;
+    const { total, lines } = getCartDetails();
+    if (!lines.length) return;
 
-    function closeModal() {
-      document.getElementById("carModal").classList.remove("open");
-    }
+    const orderType = orderTypeSelect.value;
+    const tableVal = orderType === 'Takeaway' ? 'Takeaway' : (tableInput.value.trim() || 'Counter');
+    const customerName = document.getElementById('customerName').value.trim() || 'Guest';
+    const notes = document.getElementById('orderNotes').value.trim() || 'None';
+    const itemsFormatted = lines.map(l => `${l.qty}x ${l.name}`).join(', ');
 
-    function updateQuote() {
-      if (!activeCar) return;
-      const idx = document.getElementById("variantSelect").value;
-      const v = activeCar.variants[idx];
-      const onRoad = v.exShowroom + v.rto + v.insurance;
+    btn.disabled = true;
+    btn.textContent = 'Sending Ticket to Kitchen...';
 
-      document.getElementById("qExShowroom").textContent = formatINR(v.exShowroom);
-      document.getElementById("qRto").textContent = formatINR(v.rto);
-      document.getElementById("qInsurance").textContent = formatINR(v.insurance);
-      document.getElementById("qTotal").textContent = formatINR(onRoad);
+    let orderId = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
 
-      const principal = onRoad * 0.80;
-      const r = 8.9 / 12 / 100;
-      const n = 60;
-      const emi = Math.round((principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1));
-      document.getElementById("emiBanner").textContent = `Est. EMI: \${formatINR(emi)}/mo (80% Finance @ 8.9% for 5 Yrs)`;
-    }
-
-    function toggleSlotField() {
-      const action = document.getElementById("leadAction").value;
-      document.getElementById("slotGroup").style.display = action.includes("Test Drive") ? "block" : "none";
-    }
-
-    function submitLeadToWhatsApp() {
-      if (!activeCar) return;
-      const idx = document.getElementById("variantSelect").value;
-      const v = activeCar.variants[idx];
-      const onRoad = formatINR(v.exShowroom + v.rto + v.insurance);
-
-      const custName = document.getElementById("custName").value.trim() || "Showroom Visitor";
-      const action = document.getElementById("leadAction").value;
-      const tdSlot = document.getElementById("tdSlot").value.trim();
-      const hasExchange = document.getElementById("exchangeCheck").checked;
-
-      // 1. Fire-and-Forget Image Beacon (follows Google 302 redirects reliably without CORS blocks)
-      if (SHOWROOM_CONFIG.leadWebhookUrl) {
-        const params = new URLSearchParams({
-          custName: custName,
-          carName: activeCar.name,
-          variantName: v.name,
-          onRoadPrice: onRoad,
-          action: action,
-          tdSlot: tdSlot || "-",
-          hasExchange: hasExchange ? "true" : "false",
-          _t: Date.now()
+    // 1. Log to Google Sheet (doPost) for Kitchen KOT Auto-Print
+    if (CONFIG.APPS_SCRIPT_URL.startsWith('http')) {
+      try {
+        const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            orderType,
+            table: tableVal,
+            customerName,
+            items: itemsFormatted,
+            total,
+            notes
+          })
         });
-        const beacon = new Image();
-        beacon.src = `${SHOWROOM_CONFIG.leadWebhookUrl}?${params.toString()}`;
+        const data = await res.json();
+        if (data.orderId) orderId = data.orderId;
+      } catch (err) {
+        console.warn('Webhook offline, proceeding directly to WhatsApp:', err);
       }
-
-      // 2. Open Pre-Filled WhatsApp Message
-      const lines = [
-        `*NEW MARUTI SUZUKI INQUIRY* 🚘`,
-        `------------------------`,
-        `*Customer:* ${custName}`, `*Model:* ${activeCar.name} (${activeCar.channel})`, `*Variant:* ${v.name}`,
-        `*Est. On-Road:* ${onRoad}`, `*Request:* ${action}`,
-        tdSlot ? `*Preferred Slot:* \${tdSlot}` : null,
-        `*Old Car Exchange:* \${hasExchange ? "Yes (Interested in True Value Bonus)" : "No"}`,
-        `------------------------`,
-        `Please share the official PDF brochure & available offers!`
-      ].filter(Boolean);
-
-      const waUrl = `https://wa.me/${SHOWROOM_CONFIG.salesDeskWhatsApp}?text=${encodeURIComponent(lines.join("\n"))}`;
-      setTimeout(() => {
-        window.open(waUrl, "_blank");
-      }, 400);
     }
 
-    (async function init() {
-      await loadCatalogFromSheet();
-      const params = new URLSearchParams(window.location.search);
-      const chParam = params.get("channel");
-      if (chParam && chParam.toLowerCase() === "nexa") {
-        setChannel("NEXA");
-      } else if (chParam && chParam.toLowerCase() === "arena") {
-        setChannel("Arena");
-      } else {
-        renderCategories();
-        renderCars();
-      }
+    // 2. Open Pre-Formatted WhatsApp Order Ticket (wa.me)
+    const waText = [
+      `*NEW ORDER — ${orderId}*`,
+      `*Type:* ${orderType} (${tableVal})`,
+      `*Customer:* ${customerName}`,
+      `------------------------`,
+      ...lines.map(l => `• ${l.qty} x ${l.name} — ₹${l.lineTotal}`),
+      `------------------------`,
+      `*Total: ₹${total}*`,
+      `*Notes:* ${notes}`
+    ].join('\n');
 
-      const carParam = params.get("car");
-      if (carParam) {
-        const matched = MARUTI_CARS.find(c => c.id.toLowerCase() === carParam.toLowerCase());
-        if (matched) openCarModal(matched.id);
-      }
-    })();
-  </script>
+    const waUrl = `https://wa.me/${CONFIG.CAFE_WHATSAPP}?text=${encodeURIComponent(waText)}`;
+    window.open(waUrl, '_blank');
+
+    cart = {};
+    updateCartBar();
+    renderMenu();
+    document.getElementById('checkoutModal').classList.remove('open');
+    btn.disabled = false;
+    btn.textContent = 'Send Order on WhatsApp';
+  });
+
+  initLocationFromURL();
+  loadMenu();
+</script>
 </body>
 </html>
