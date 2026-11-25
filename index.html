@@ -89,7 +89,7 @@
       <div class="brand-title">Roast &amp; Crumb Café</div>
       <div class="table-badge" id="locationBadge">Dine-In</div>
     </div>
-    <div class="sync-status"><span class="dot"></span><span id="syncText">Live Menu Synced</span></div>
+    <div class="sync-status"><span class="dot"></span><span id="syncText">Syncing Live Menu...</span></div>
   </header>
 
   <div class="controls">
@@ -151,16 +151,13 @@
 </div>
 
 <script>
-  /**
-   * CONFIGURATION — Replace with your live Google Sheet CSV URL, Apps Script Web App URL, and Cafe WhatsApp Number
-   */
   const CONFIG = {
     SHEET_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQbvVINlu8MjHt3fAY5VO07uAmc0hiyvaFdPSW4I4DKqxdaXmL9Njtl491v8DSVsshGiUGkJvOU258M/pub?gid=0&single=true&output=csv',
-    APPS_SCRIPT_URL: 'https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnSlKSwt7OVvqD7q7X8pKLSQ1c7TL5wqjgiL2qBE-Prb4rjn0El-t09Hnxr_gT_YSy0CsAROEQZY2r2plsJ9eS0c8pfHB66HhZzv1vaVsFKEy2yh0lKK7BGepyx1uR7dh2ejG9GoYRppGhkROSenAs-GNEFDyu2bsJfkd4c790GYPaHng0EnWTmpK4TSFeH3K2IG4q7e1aeWXQsWSk3iWnh0OzOs6efXTVzr94LGT6d92FKoQeFbbyfHFVteqJNY95BsEKR79CLafBuRuf_Y-iZnJPDMUg&lib=MBYxcEnl8IQvVaBIU8EMWyGXl3gJVnX-m',
+    APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyE3skapxBaFbBhulyX3EXZT-X0gQiy_lVJ_CA2J1hvlCeaGLpUiMjt0bzdz0Pmhu7e/exec',
     CAFE_WHATSAPP: '919444143914'
   };
 
-  // Embedded Offline Fallback Menu (FR-1.1)
+  // Embedded Offline Fallback Menu
   const FALLBACK_MENU = [
     { id: 1, category: 'Hot Coffee', name: 'Signature Flat White', desc: 'Double ristretto poured over velvety micro-foamed milk.', price: 180, veg: true, bestseller: true, available: true },
     { id: 2, category: 'Hot Coffee', name: 'Spanish Cortado', desc: 'Equal parts bold espresso and textured sweetened milk.', price: 170, veg: true, bestseller: false, available: true },
@@ -176,7 +173,7 @@
   let activeCategory = 'All';
   let searchQuery = '';
 
-  // FR-1.2: URL Parameter Auto-Detection (?table=04 & ?type=takeaway)
+  // URL Parameter Auto-Detection (?table=04 & ?type=takeaway)
   const params = new URLSearchParams(window.location.search);
   const urlTable = params.get('table');
   const urlType = (params.get('type') || '').toLowerCase();
@@ -206,16 +203,42 @@
     }
   }
 
-  // CSV Parser for Published Google Sheet
+  // RFC-compliant CSV line parser (handles commas inside quoted descriptions)
+  function parseCSVRow(row) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < row.length; i++) {
+      const char = row[i];
+      if (char === '"') {
+        if (inQuotes && row[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  }
+
   function parseCSV(text) {
-    const lines = text.trim().split(/\r?\n/);
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-    return lines.slice(1).map(line => {
-      const cols = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
+    const lines = text.trim().split(/\r?\n/).filter(l => l.trim().length > 0);
+    if (lines.length < 2) return [];
+    const headers = parseCSVRow(lines[0]).map(h => h.toLowerCase());
+    return lines.slice(1).map((line, idx) => {
+      const cols = parseCSVRow(line);
       const obj = {};
-      headers.forEach((h, idx) => {
-        let val = (cols[idx] || '').replace(/^"|"$/g, '').trim();
-        if (h === 'id' || h === 'price') val = Number(val);
+      headers.forEach((h, i) => {
+        let val = (cols[i] || '').trim();
+        if (h === 'id') val = Number(val) || (idx + 1);
+        if (h === 'price') val = Number(val) || 0;
         if (h === 'veg' || h === 'bestseller' || h === 'available') val = val.toUpperCase() === 'TRUE';
         obj[h] = val;
       });
@@ -225,14 +248,15 @@
 
   async function loadMenu() {
     try {
-      if (!CONFIG.SHEET_CSV_URL.startsWith('http')) throw new Error('Using fallback');
-      const res = await fetch(CONFIG.SHEET_CSV_URL);
+      const res = await fetch(CONFIG.SHEET_CSV_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       const csv = await res.text();
-      const parsed = parseCSV(csv).filter(item => item.available === true);
-      if (!parsed.length) throw new Error('Empty sheet');
+      const parsed = parseCSV(csv).filter(item => item.available === true && item.name);
+      if (!parsed.length) throw new Error('No available items found in sheet');
       menuItems = parsed;
       document.getElementById('syncText').textContent = 'Live Google Sheet Synced';
     } catch (e) {
+      console.warn('Falling back to offline menu:', e);
       menuItems = FALLBACK_MENU.filter(item => item.available === true);
       document.getElementById('syncText').textContent = 'Offline Instant Menu Ready';
     }
@@ -244,7 +268,7 @@
     const cats = ['All', ...new Set(menuItems.map(i => i.category))];
     const catBar = document.getElementById('catBar');
     catBar.innerHTML = cats.map(c =>
-      `<button class="cat-tab ${c === activeCategory ? 'active' : ''}" onclick="setCategory('${c}')">${c}</button>`
+      `<button class="cat-tab ${c === activeCategory ? 'active' : ''}" onclick="setCategory('${c.replace(/'/g, "\\'")}')">${c}</button>`
     ).join('');
   }
 
@@ -285,7 +309,7 @@
                 ${item.bestseller ? '<span class="bestseller">★ BESTSELLER</span>' : ''}
               </div>
               <div class="item-name">${item.name}</div>
-              <div class="item-desc">${item.desc}</div>
+              <div class="item-desc">${item.desc || ''}</div>
               <div class="item-price">₹${item.price}</div>
             </div>
             <div class="stepper">
@@ -335,7 +359,6 @@
     }
   }
 
-  // Event Listeners
   document.getElementById('searchInput').addEventListener('input', e => {
     searchQuery = e.target.value.trim().toLowerCase();
     renderMenu();
@@ -360,7 +383,7 @@
     document.getElementById('checkoutModal').classList.remove('open');
   });
 
-  // FR-1.5: Dual-Channel Order Dispatch (Google Sheet Webhook + WhatsApp Ticket)
+  // Dual-Channel Order Dispatch (Google Sheet Webhook + WhatsApp Ticket)
   document.getElementById('submitOrderBtn').addEventListener('click', async function() {
     const btn = this;
     const { total, lines } = getCartDetails();
@@ -377,25 +400,24 @@
 
     let orderId = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
 
-    // 1. Log to Google Sheet (doPost) for Kitchen KOT Auto-Print
-    if (CONFIG.APPS_SCRIPT_URL.startsWith('http')) {
-      try {
-        const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            orderType,
-            table: tableVal,
-            customerName,
-            items: itemsFormatted,
-            total,
-            notes
-          })
-        });
-        const data = await res.json();
-        if (data.orderId) orderId = data.orderId;
-      } catch (err) {
-        console.warn('Webhook offline, proceeding directly to WhatsApp:', err);
-      }
+    // 1. Log to Google Sheet (doPost) using text/plain to avoid CORS preflight
+    try {
+      const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          orderType,
+          table: tableVal,
+          customerName,
+          items: itemsFormatted,
+          total,
+          notes
+        })
+      });
+      const data = await res.json();
+      if (data.orderId) orderId = data.orderId;
+    } catch (err) {
+      console.warn('Webhook redirect handled, proceeding to WhatsApp:', err);
     }
 
     // 2. Open Pre-Formatted WhatsApp Order Ticket (wa.me)
