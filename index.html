@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Maruti Suzuki Showroom — Digital Catalog & Test Drive</title>
+  <style>
+    :root {
+      --arena-blue: #1D4ED8;
+      --nexa-dark: #111827;
+      --accent-red: #DC2626;
+      --whatsapp: #25D366;
+      --bg: #F3F4F6;
+      --surface: #FFFFFF;
+      --text-main: #111827;
+      --text-muted: #6B7280;
+      --border: #E5E7EB;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      max-width: 540px;
+      margin: 0 auto;
+      padding-bottom: 40px;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%);
+      color: #FFFFFF;
+      padding: 20px 18px 18px;
+      border-bottom-left-radius: 20px;
+      border-bottom-right-radius: 20px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .dealer-badge {
+      background: rgba(255, 255, 255, 0.16);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 99px;
+    }
+
+    .sync-status {
+      font-size: 11px;
+      color: #93C5FD;
+    }
+
+    header h1 {
+      font-size: 21px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    header p {
+      font-size: 13px;
+      opacity: 0.85;
+    }
+
+    /* Channel Switcher (All / Arena / NEXA) */
+    .channel-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 14px 16px 6px;
+    }
+
+    .ch-btn {
+      flex: 1;
+      padding: 9px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-main);
+      transition: all 0.2s;
+    }
+
+    .ch-btn.active[data-ch="All"] {
+      background: var(--arena-blue);
+      color: #FFFFFF;
+      border-color: var(--arena-blue);
+    }
+
+    .ch-btn.active[data-ch="Arena"] {
+      background: var(--arena-blue);
+      color: #FFFFFF;
+      border-color: var(--arena-blue);
+    }
+
+    .ch-btn.active[data-ch="NEXA"] {
+      background: var(--nexa-dark);
+      color: #FFFFFF;
+      border-color: var(--nexa-dark);
+    }
+
+    /* Category Pills */
+    .cat-bar {
+      display: flex;
+      gap: 8px;
+      padding: 8px 16px 12px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .cat-bar::-webkit-scrollbar { display: none; }
+
+    .cat-pill {
+      padding: 6px 14px;
+      border-radius: 99px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .cat-pill.active {
+      background: #DBEAFE;
+      border-color: var(--arena-blue);
+      color: var(--arena-blue);
+    }
+
+    /* Car Cards */
+    .car-list {
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .car-card {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .channel-tag {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 5px;
+      letter-spacing: 0.6px;
+    }
+
+    .tag-arena {
+      background: #DBEAFE;
+      color: #1E40AF;
+    }
+
+    .tag-nexa {
+      background: #111827;
+      color: #F9FAFB;
+    }
+
+    .car-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-top: 6px;
+    }
+
+    .car-tagline {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .specs-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .spec-chip {
+      background: #F9FAFB;
+      border: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 9px;
+      border-radius: 6px;
+      color: #374151;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .price-label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .price-val {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .btn-explore {
+      background: var(--arena-blue);
+      color: #FFFFFF;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-explore.nexa-btn {
+      background: var(--nexa-dark);
+    }
+
+    /* Bottom Sheet Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 50;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal-sheet {
+      background: var(--surface);
+      width: 100%;
+      max-width: 540px;
+      border-top-left-radius: 22px;
+      border-top-right-radius: 22px;
+      padding: 20px 18px 28px;
+      max-height: 92vh;
+      overflow-y: auto;
+    }
+
+    .modal-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+
+    .close-btn {
+      background: #F3F4F6;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 5px;
+    }
+
+    .form-group select, .form-group input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      background: #F9FAFB;
+    }
+
+    /* On-Road Price Box */
+    .quote-box {
+      background: #F8FAFC;
+      border: 1px solid #CBD5E1;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+
+    .quote-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: #475569;
+    }
+
+    .quote-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 16px;
+      font-weight: 800;
+      color: #0F172A;
+      padding-top: 8px;
+      border-top: 1px dashed #CBD5E1;
+      margin-top: 6px;
+    }
+
+    .emi-banner {
+      background: #EFF6FF;
+      color: #1E40AF;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .action-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .btn-brochure {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1.5px solid var(--arena-blue);
+      background: #FFFFFF;
+      color: var(--arena-blue);
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+    }
+
+    .btn-whatsapp {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      background: var(--whatsapp);
+      color: #052E16;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    .checkbox-row input { width: auto; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="top-bar">
+      <span class="dealer-badge" id="dealerTag">Authorized Maruti Suzuki Dealer</span>
+      <span class="sync-status" id="syncStatus">● Catalog Ready</span>
+    </div>
+    <h1 id="showroomName">Prime Maruti Arena & NEXA</h1>
+    <p id="showroomSub">Instant On-Road Price • EMI Calculator • Test Drive</p>
+  </header>
+
+  <div class="channel-tabs">
+    <button class="ch-btn active" data-ch="All" onclick="setChannel('All')">All Models</button>
+    <button class="ch-btn" data-ch="Arena" onclick="setChannel('Arena')">Arena</button>
+    <button class="ch-btn" data-ch="NEXA" onclick="setChannel('NEXA')">NEXA</button>
+  </div>
+
+  <div class="cat-bar" id="catBar"></div>
+
+  <main class="car-list" id="carList"></main>
+
+  <!-- Car Details & Quote Bottom Sheet -->
+  <div class="modal-backdrop" id="carModal">
+    <div class="modal-sheet">
+      <div class="modal-top">
+        <div>
+          <span class="channel-tag" id="modalChannelTag">ARENA</span>
+          <h2 id="modalCarName" style="font-size:19px; margin-top:4px;">All-New Swift</h2>
+        </div>
+        <button class="close-btn" onclick="closeModal()">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label>Select Variant</label>
+        <select id="variantSelect" onchange="updateQuote()"></select>
+      </div>
+
+      <div class="quote-box">
+        <div class="quote-row">
+          <span>Ex-Showroom Price</span>
+          <strong id="qExShowroom">₹0</strong>
+        </div>
+        <div class="quote-row">
+          <span>RTO & Road Tax (Est.)</span>
+          <strong id="qRto">₹0</strong>
+        </div>
+        <div class="quote-row">
+          <span>Comprehensive Insurance (1+3 Yr)</span>
+          <strong id="qInsurance">₹0</strong>
+        </div>
+        <div class="quote-total">
+          <span>Est. On-Road Price</span>
+          <span id="qTotal">₹0</span>
+        </div>
+        <div class="emi-banner" id="emiBanner">
+          Est. EMI: ₹11,450/month (80% Loan @ 8.9% for 5 Yrs)
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Your Name</label>
+        <input type="text" id="custName" placeholder="Enter your full name" />
+      </div>
+
+      <div class="form-group">
+        <label>What would you like to do?</label>
+        <select id="leadAction" onchange="toggleSlotField()">
+          <option value="Get On-Road Quote & Brochure on WhatsApp">Get On-Road Quote & Brochure on WhatsApp</option>
+          <option value="Book a Test Drive (At Showroom)">Book a Test Drive (At Showroom)</option>
+          <option value="Book a Home Test Drive">Book a Home Test Drive</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="slotGroup" style="display:none;">
+        <label>Preferred Test Drive Slot</label>
+        <input type="text" id="tdSlot" placeholder="e.g., Today 4:30 PM or Sunday Morning" />
+      </div>
+
+      <label class="checkbox-row">
+        <input type="checkbox" id="exchangeCheck" />
+        I have an old car for True Value Exchange Bonus
+      </label>
+
+      <div class="action-buttons">
+        <a id="brochureBtn" href="#" target="_blank" class="btn-brochure">
+          📄 View Official Brochure PDF
+        </a>
+        <button class="btn-whatsapp" onclick="submitLeadToWhatsApp()">
+          📲 Get Quote & Book on WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========================================================
+    // 1. SHOWROOM CONFIGURATION (EDIT THESE 3 LINKS)
+    // ========================================================
+    const SHOWROOM_CONFIG = {
+      name: "Popular Prime Maruti Arena & NEXA",
+      tagline: "Authorized Maruti Suzuki Dealership",
+      salesDeskWhatsApp: "919444143914", // Showroom manager WhatsApp (with 91 prefix)
+      googleSheetCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlPWPRqbvTVXbXUBVZ0xfgG3p_4McBKF8cn34ri36aWz953xjU8_s6SzxRtZUYzR5ohibE2oJMhuW1/pub?gid=0&single=true&output=csv",             // Paste published Catalog CSV link here
+      leadWebhookUrl: "https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnQxd1Sp1_5dLlVmC0BmmgXcWsO9yu-093-mSbI2HVz44w4PowRtJb8uoLB2Ob-7cA8joQTjru7WHlFonP4f7HizNlkfjWJ95hYNsRQMGqdl2DrUABKVSVPMVe49cXWpVxtO5QMb4jnDP_4d5gV7mOgbzpSL3vdavn0jM4s0ggXOldVQ1dLLeqgpLSX9kTv015QRpgY5g6grAsDbnt4OscPErMjBmU_mwXclYX6Lh6rL6K6Bn_g_IPnjmO0I5blp8qTbj1oQIJYeLgR8TRVmTSY1oB8pbw&lib=M9weHGg9TIDIGcPKbaxgWUWQIiqB8NiXZ"                 // Paste deployed Apps Script Web App URL here
+    };
+
+    // Fallback catalog if Google Sheet CSV is blank or offline
+    let MARUTI_CARS = [
+      {
+        id: "swift",
+        channel: "Arena",
+        category: "Hatchback",
+        name: "All-New Swift",
+        tagline: "Sporty Hatchback with Epic Mileage",
+        fuel: "Petrol / S-CNG",
+        mileage: "25.75 kmpl",
+        engine: "1.2L Z12E",
+        brochure: "https://www.marutisuzuki.com/swift",
+        variants: [
+          { name: "LXi Petrol (Base)", exShowroom: 649000, rto: 58400, insurance: 32600 },
+          { name: "VXi (O) Petrol", exShowroom: 756500, rto: 68000, insurance: 35500 },
+          { name: "VXi S-CNG", exShowroom: 819500, rto: 73700, insurance: 37200 },
+          { name: "ZXi+ AMT Petrol (Top)", exShowroom: 959500, rto: 86300, insurance: 41200 }
+        ]
+      },
+      {
+        id: "brezza",
+        channel: "Arena",
+        category: "SUV",
+        name: "Maruti Brezza",
+        tagline: "City-Bred Compact SUV",
+        fuel: "Petrol / S-CNG",
+        mileage: "25.51 km/kg",
+        engine: "1.5L K15C",
+        brochure: "https://www.marutisuzuki.com/brezza",
+        variants: [
+          { name: "LXi Petrol", exShowroom: 834000, rto: 75000, insurance: 38500 },
+          { name: "VXi S-CNG", exShowroom: 1064500, rto: 106000, insurance: 44500 },
+          { name: "ZXi+ AT Dual Tone", exShowroom: 1414000, rto: 141400, insurance: 52600 }
+        ]
+      },
+      {
+        id: "fronx",
+        channel: "NEXA",
+        category: "SUV",
+        name: "NEXA Fronx",
+        tagline: "The Shape of New — Coupe SUV",
+        fuel: "Turbo Petrol / CNG",
+        mileage: "22.89 kmpl",
+        engine: "1.0L Boosterjet",
+        brochure: "https://www.nexaexperience.com/fronx",
+        variants: [
+          { name: "Sigma 1.2L Petrol", exShowroom: 751500, rto: 67600, insurance: 35400 },
+          { name: "Delta+ S-CNG", exShowroom: 932500, rto: 83900, insurance: 40500 },
+          { name: "Alpha 1.0L Turbo AT", exShowroom: 1287500, rto: 128700, insurance: 49200 }
+        ]
+      },
+      {
+        id: "grand_vitara",
+        channel: "NEXA",
+        category: "SUV",
+        name: "NEXA Grand Vitara",
+        tagline: "Intelligent Electric Hybrid SUV",
+        fuel: "Strong Hybrid / CNG",
+        mileage: "27.97 kmpl",
+        engine: "1.5L Hybrid",
+        brochure: "https://www.nexaexperience.com/grand-vitara",
+        variants: [
+          { name: "Sigma Smart Hybrid", exShowroom: 1099000, rto: 109900, insurance: 45200 },
+          { name: "Delta S-CNG", exShowroom: 1315000, rto: 131500, insurance: 50100 },
+          { name: "Alpha+ Strong Hybrid e-CVT", exShowroom: 1993000, rto: 199300, insurance: 65400 }
+        ]
+      }
+    ];
+
+    // ========================================================
+    // 2. APP LOGIC & GOOGLE SHEET SYNC
+    // ========================================================
+    let selectedChannel = "All";
+    let selectedCategory = "All";
+    let activeCar = null;
+
+    document.getElementById("showroomName").textContent = SHOWROOM_CONFIG.name;
+    document.getElementById("dealerTag").textContent = SHOWROOM_CONFIG.tagline;
+
+    function formatINR(num) {
+      return "₹" + Number(num).toLocaleString("en-IN");
+    }
+
+    function formatLakh(num) {
+      return "₹" + (num / 100000).toFixed(2) + " Lakh";
+    }
+
+    // Parse CSV from Google Sheet
+    function parseCsvRow(row) {
+      const result = [];
+      let current = "";
+      let inQuotes = false;
+      for (let i = 0; i < row.length; i++) {
+        const char = row[i];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          result.push(current.trim());
+          current = "";
+        } else {
+          current += char;
+        }
+      }
+      result.push(current.trim());
+      return result;
+    }
+
+    async function loadCatalogFromSheet() {
+      if (!SHOWROOM_CONFIG.googleSheetCsvUrl) return;
+      const statusEl = document.getElementById("syncStatus");
+      statusEl.textContent = "↻ Syncing Prices...";
+
+      try {
+        const res = await fetch(SHOWROOM_CONFIG.googleSheetCsvUrl);
+        const text = await res.text();
+        const lines = text.split(/\r?\n/).filter(l => l.trim());
+        if (lines.length < 2) return;
+
+        const headers = parseCsvRow(lines[0]).map(h => h.toLowerCase());
+        const grouped = {};
+
+        for (let i = 1; i < lines.length; i++) {
+          const cols = parseCsvRow(lines[i]);
+          const rowObj = {};
+          headers.forEach((h, idx) => rowObj[h] = cols[idx] || "");
+
+          if (rowObj.available && rowObj.available.toUpperCase() === "FALSE") continue;
+          const id = rowObj.car_id;
+          if (!id) continue;
+
+          if (!grouped[id]) {
+            grouped[id] = {
+              id: id,
+              channel: rowObj.channel || "Arena",
+              category: rowObj.category || "Car",
+              name: rowObj.model_name || id,
+              tagline: rowObj.tagline || "",
+              fuel: rowObj.fuel || "Petrol",
+              mileage: rowObj.mileage || "",
+              engine: rowObj.engine || "",
+              brochure: rowObj.brochure_url || "#",
+              variants: []
+            };
+          }
+
+          grouped[id].variants.push({
+            name: rowObj.variant || "Standard",
+            exShowroom: Number(rowObj.ex_showroom) || 0,
+            rto: Number(rowObj.rto) || 0,
+            insurance: Number(rowObj.insurance) || 0
+          });
+        }
+
+        const parsedCars = Object.values(grouped);
+        if (parsedCars.length > 0) {
+          MARUTI_CARS = parsedCars;
+          statusEl.textContent = "● Live Prices Synced";
+        }
+      } catch (err) {
+        console.warn("Using fallback catalog:", err);
+        statusEl.textContent = "● Offline Catalog";
+      }
+    }
+
+    function setChannel(ch) {
+      selectedChannel = ch;
+      document.querySelectorAll(".ch-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.ch === ch);
+      });
+      renderCategories();
+      renderCars();
+    }
+
+    function renderCategories() {
+      const filteredByCh = MARUTI_CARS.filter(c => selectedChannel === "All" || c.channel === selectedChannel);
+      const cats = ["All", ...new Set(filteredByCh.map(c => c.category))];
+      if (!cats.includes(selectedCategory)) selectedCategory = "All";
+
+      document.getElementById("catBar").innerHTML = cats.map(cat => `
+        <button class="cat-pill ${cat === selectedCategory ? 'active' : ''}" onclick="setCategory('${cat}')">
+          ${cat}
+        </button>
+      `).join("");
+    }
+
+    function setCategory(cat) {
+      selectedCategory = cat;
+      renderCategories();
+      renderCars();
+    }
+
+    function renderCars() {
+      const list = document.getElementById("carList");
+      const cars = MARUTI_CARS.filter(c => {
+        if (selectedChannel !== "All" && c.channel !== selectedChannel) return false;
+        if (selectedCategory !== "All" && c.category !== selectedCategory) return false;
+        return true;
+      });
+
+      list.innerHTML = cars.map(car => {
+        const baseVar = car.variants[0];
+        const startingOnRoad = baseVar.exShowroom + baseVar.rto + baseVar.insurance;
+        const isNexa = car.channel.toLowerCase() === "nexa";
+
+        return `
+          <div class="car-card">
+            <div class="card-header">
+              <div>
+                <span class="channel-tag ${isNexa ? 'tag-nexa' : 'tag-arena'}">${car.channel} • ${car.category}</span>
+                <div class="car-title">${car.name}</div>
+              </div>
+            </div>
+            <div class="car-tagline">${car.tagline}</div>
+            <div class="specs-row">
+              <span class="spec-chip">⛽ ${car.fuel}</span>
+              ${car.mileage ? `<span class="spec-chip">⚡ ${car.mileage}</span>` : ""}
+              ${car.engine ? `<span class="spec-chip">⚙️ ${car.engine}</span>` : ""}
+            </div>
+            <div class="card-footer">
+              <div>
+                <div class="price-label">Starting On-Road Price</div>
+                <div class="price-val">${formatLakh(startingOnRoad)}*</div>
+              </div>
+              <button class="btn-explore ${isNexa ? 'nexa-btn' : ''}" onclick="openCarModal('${car.id}')">
+                Price & Test Drive →
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function openCarModal(carId) {
+      activeCar = MARUTI_CARS.find(c => c.id === carId);
+      if (!activeCar) return;
+
+      const tag = document.getElementById("modalChannelTag");
+      tag.textContent = activeCar.channel.toUpperCase();
+      tag.className = "channel-tag " + (activeCar.channel.toLowerCase() === "nexa" ? "tag-nexa" : "tag-arena");
+
+      document.getElementById("modalCarName").textContent = activeCar.name;
+      document.getElementById("brochureBtn").href = activeCar.brochure;
+
+      const select = document.getElementById("variantSelect");
+      select.innerHTML = activeCar.variants.map((v, idx) => `
+        <option value="${idx}">${v.name} — Ex-Showroom ${formatINR(v.exShowroom)}</option>
+      `).join("");
+
+      updateQuote();
+      document.getElementById("carModal").classList.add("open");
+    }
+
+    function closeModal() {
+      document.getElementById("carModal").classList.remove("open");
+    }
+
+    function updateQuote() {
+      if (!activeCar) return;
+      const idx = document.getElementById("variantSelect").value;
+      const v = activeCar.variants[idx];
+      const onRoad = v.exShowroom + v.rto + v.insurance;
+
+      document.getElementById("qExShowroom").textContent = formatINR(v.exShowroom);
+      document.getElementById("qRto").textContent = formatINR(v.rto);
+      document.getElementById("qInsurance").textContent = formatINR(v.insurance);
+      document.getElementById("qTotal").textContent = formatINR(onRoad);
+
+      // 80% Loan, 8.9% interest, 60 months EMI calculation
+      const principal = onRoad * 0.80;
+      const r = 8.9 / 12 / 100;
+      const n = 60;
+      const emi = Math.round((principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1));
+      document.getElementById("emiBanner").textContent = `Est. EMI: ${formatINR(emi)}/mo (80% Finance @ 8.9% for 5 Yrs)`;
+    }
+
+    function toggleSlotField() {
+      const action = document.getElementById("leadAction").value;
+      document.getElementById("slotGroup").style.display = action.includes("Test Drive") ? "block" : "none";
+    }
+
+    function submitLeadToWhatsApp() {
+      if (!activeCar) return;
+      const idx = document.getElementById("variantSelect").value;
+      const v = activeCar.variants[idx];
+      const onRoad = formatINR(v.exShowroom + v.rto + v.insurance);
+
+      const custName = document.getElementById("custName").value.trim() || "Showroom Visitor";
+      const action = document.getElementById("leadAction").value;
+      const tdSlot = document.getElementById("tdSlot").value.trim();
+      const hasExchange = document.getElementById("exchangeCheck").checked;
+
+      // 1. Log Lead Silently to Google Sheet Webhook (using no-cors POST so browser never blocks it)
+      if (SHOWROOM_CONFIG.leadWebhookUrl) {
+        fetch(SHOWROOM_CONFIG.leadWebhookUrl, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({
+            custName: custName,
+            carName: activeCar.name,
+            variantName: v.name,
+            onRoadPrice: onRoad,
+            action: action,
+            tdSlot: tdSlot || "-",
+            hasExchange: hasExchange
+          })
+        }).catch(err => console.warn("Webhook log error:", err));
+      }
+
+      // 2. Open Pre-Filled WhatsApp Message to Showroom Sales Desk
+      const lines = [
+        `*NEW MARUTI SUZUKI INQUIRY* 🚘`,
+        `------------------------`,
+        `*Customer:* ${custName}`,
+        `*Model:* ${activeCar.name} (${activeCar.channel})`,
+        `*Variant:* ${v.name}`,
+        `*Est. On-Road:* ${onRoad}`,
+        `*Request:* ${action}`,
+        tdSlot ? `*Preferred Slot:* ${tdSlot}` : null,
+        `*Old Car Exchange:* ${hasExchange ? "Yes (Interested in True Value Bonus)" : "No"}`,
+        `------------------------`,
+        `Please share the official PDF brochure & available offers!`
+      ].filter(Boolean);
+
+      const waUrl = `https://wa.me/${SHOWROOM_CONFIG.salesDeskWhatsApp}?text=${encodeURIComponent(lines.join("\n"))}`;
+      window.open(waUrl, "_blank");
+    }
+
+    // Initialize App & Handle URL Parameters (?car=swift or ?channel=nexa)
+    (async function init() {
+      await loadCatalogFromSheet();
+      const params = new URLSearchParams(window.location.search);
+      const chParam = params.get("channel");
+      if (chParam && chParam.toLowerCase() === "nexa") {
+        setChannel("NEXA");
+      } else if (chParam && chParam.toLowerCase() === "arena") {
+        setChannel("Arena");
+      } else {
+        renderCategories();
+        renderCars();
+      }
+
+      const carParam = params.get("car");
+      if (carParam) {
+        const matched = MARUTI_CARS.find(c => c.id.toLowerCase() === carParam.toLowerCase());
+        if (matched) openCarModal(matched.id);
+      }
+    })();
+  </script>
+</body>
+</html>
